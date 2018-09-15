@@ -4,8 +4,8 @@
 
 using namespace std;
 
-// the state of CNC: waiting for loading, loading, processing, waiting for unloading, unloading
-enum CNCStateT { Waitload, CNCLoad, Waitprocess, Process, Waitunload, CNCUnload };
+// the state of CNC: waiting for loading, loading, processing
+enum CNCStateT { Waitload, CNCLoad, Waitprocess, Process};
 
 class CNC
 {
@@ -19,12 +19,11 @@ public:
 	CNCStateT state;
 	list<CNC*>* waitLoadList;
 	list<CNC*>* processList;
-	list<CNC*>* waitUnloadList;
 	int currentTime;
 
 
 	void init(int pos, int loadtime, int processtime, 
-		list<CNC*>* _waitLoadList, list<CNC*>* _processList, list<CNC*>* _waitUnloadList)
+		list<CNC*>* _waitLoadList, list<CNC*>* _processList)
 	{
 		Pos = pos;
 		LoadTime = loadtime;
@@ -32,13 +31,15 @@ public:
 		workRemainTime = 0;
 		waitLoadList = _waitLoadList;
 		processList = _processList;
-		waitUnloadList = _waitUnloadList;
-		endUnload();  // init
+
+		// init
+		state = Waitload;  
+		waitLoadList->push_back(this);
 
 	}
 
 
-	void updateState()
+	void updateRemainTime()
 	{
 		--workRemainTime;
 	}
@@ -54,9 +55,6 @@ public:
 
 	void endProcess();
 
-	void startUnload();
-
-	void endUnload();
 };
 
 

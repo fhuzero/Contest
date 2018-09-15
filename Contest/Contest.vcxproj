@@ -157,7 +157,6 @@
     <ClCompile Include="CNC.cpp" />
     <ClCompile Include="Contest.cpp" />
     <ClCompile Include="RGV.cpp" />
-    <ClCompile Include="scheduling.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

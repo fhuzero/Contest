@@ -4,7 +4,7 @@
 
 using namespace std;
 
-CNC * getDest(const list<CNC*>& waitLoadList, const list<CNC*>& processList, const list<CNC*>& waitUnloadList)
+CNC * getDest(const list<CNC*>& waitLoadList, const list<CNC*>& processList)
 {
 	//initial value
 	int max_waitCNC, max_Pos;  //actually the minimum value
@@ -34,23 +34,6 @@ CNC * getDest(const list<CNC*>& waitLoadList, const list<CNC*>& processList, con
 			flag = true;
 		}
 		for (auto iter = processList.begin(); iter != processList.end(); iter++)
-		{
-			if ((*iter)->workRemainTime < max_waitCNC)
-			{
-				max_waitCNC = (*iter)->workRemainTime;
-				//max_Pos = *iter->Pos;
-				ret_CNC = *iter;
-			}
-		}
-	}
-	if (!waitUnloadList.empty()) {
-		if (!flag) {
-			max_waitCNC = (*waitUnloadList.begin())->workRemainTime;
-			max_Pos = (*waitUnloadList.begin())->Pos;
-			ret_CNC = *waitUnloadList.begin();
-			flag = true;
-		}
-		for (auto iter = waitUnloadList.begin(); iter != waitUnloadList.end(); iter++)
 		{
 			if ((*iter)->workRemainTime < max_waitCNC)
 			{

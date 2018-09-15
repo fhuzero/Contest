@@ -6,7 +6,7 @@
 	if (state == Stop) {
 		cout << "[" << currentTime << "]" << "[RGV]";
 		// do job
-		dest = getDest(*waitLoadList, *processList, *waitUnloadList);
+		dest = getDest(*waitLoadList, *processList);
 		startRun();
 
 	}
@@ -28,13 +28,8 @@
 			startLoad();
 			break;
 
-		case Waitunload:
-			cout << "[" << currentTime << "]" << "[RGV]";
 
-			startUnload();
-			break;
-
-		case Process: case CNCLoad: case CNCUnload: default:
+		case Process: case CNCLoad: default:
 			break;
 		}
 	}

@@ -8,7 +8,7 @@ void CNC::endWork()
 
 		switch (state)
 		{
-		case Waitload:case Waitunload:
+		case Waitload:
 			break;
 
 		case CNCLoad: 
@@ -19,9 +19,6 @@ void CNC::endWork()
 			cout << "[" << currentTime << "]" << "[CNC" << Pos << "]"; 
 			endProcess(); break;
 
-		case CNCUnload: 
-			cout << "[" << currentTime << "]" << "[CNC" << Pos << "]"; 
-			endUnload(); break;
 
 		default:
 			break;
@@ -45,9 +42,7 @@ void CNC::endLoad()
 	// after loading, start processing immediately
 	cout << "[" << currentTime << "]";
 	startProcess();
-	processList->push_back(this);
-
-
+	
 }
 
 void CNC::startProcess()
@@ -55,32 +50,14 @@ void CNC::startProcess()
 	cout << "[CNC" << Pos << "]start process; " << endl;
 	workRemainTime = ProcessTime;
 	state = Process;
-	processList->remove(this);
+	processList->push_back(this);
+
 }
 
 void CNC::endProcess()
 {
 	cout << "end process" << endl;
-	state = Waitunload;
-	processList->remove(this);
-	//waitLoadList.push_back(this);
-}
-
-void CNC::startUnload()
-{
-	cout << "[CNC" << Pos << "]start unload; " << endl;
-	if (state != Waitunload)
-		cout << "Error!";
-	workRemainTime = LoadTime;
-	state = CNCUnload;
-
-}
-
-void CNC::endUnload()
-{
-	cout << "end unload; " << endl;
 	state = Waitload;
-	//waitUnloadList.push_back(this);
+	processList->remove(this);
 	waitLoadList->push_back(this);
 }
-

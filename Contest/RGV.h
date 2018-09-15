@@ -13,7 +13,7 @@ using namespace std;
 // the state of RGV: (init), stop, run, load, unload, clean
 // when loading, unloading and cleaning, RGV cannot move
 // wait is similar to stop, but the task has been distributed
-enum RGVStateT { Stop, Wait, Waitclean, Run, Load, Unload, Clean };
+enum RGVStateT { Stop, Wait, Waitclean, Run, Load, Clean };
 
 struct Material
 {
@@ -24,7 +24,6 @@ struct Material
 	int startProcessTime;
 	int endProcessTime;
 	int startUnloadTime;
-	int endUnloadTime;
 	string toString()
 	{
 		// 加工物料序号	加工CNC编号	上料开始时间	下料开始时间
@@ -35,7 +34,7 @@ struct Material
 	void clear()
 	{
 		no = pos = startLoadTime = endLoadTime = startProcessTime = endProcessTime
-			= startProcessTime = endProcessTime = startUnloadTime = endLoadTime
+			= startProcessTime = endProcessTime = startUnloadTime
 			= -1;
 
 	}
@@ -66,7 +65,7 @@ public:
 	
 
 	void init(vector<int> RGVmovetime, int cleantime, 
-		list<CNC*>* _waitLoadList, list<CNC*>* _processList, list<CNC*>* _waitUnloadList)
+		list<CNC*>* _waitLoadList, list<CNC*>* _processList)
 	{
 		RGVMoveTime = RGVmovetime;
 		CleanTime = cleantime;
@@ -76,11 +75,10 @@ public:
 		dest = nullptr;
 		waitLoadList = _waitLoadList;
 		processList = _processList;
-		waitUnloadList = _waitUnloadList;
 		file.open("data.csv", ios::out);
 		materialNumber = 0;
 		currentMaterials = vector<Material>(9);
-		for (auto m : currentMaterials)
+		for (auto& m : currentMaterials)
 			m.clear();
 	}
 
@@ -89,8 +87,6 @@ public:
 	void endWork()
 	{
 		if (workRemainTime == 0) {
-
-			
 
 			switch (state)
 			{
@@ -110,11 +106,6 @@ public:
 			case Clean:
 				cout << "[" << currentTime << "]" << "[RGV]";
 				endClean();
-				break;
-
-			case Unload:
-				cout << "[" << currentTime << "]" << "[RGV]";
-				endUnload();
 				break;
 
 			default:
@@ -168,7 +159,18 @@ public:
 		workRemainTime = dest->workRemainTime;
 		state = Load;
 		
-		currentMaterials[dest->Pos].startLoadTime = currentTime;
+		
+		// write previous material
+		if (currentMaterials[pos].no != -1) {
+			// write csv
+			currentMaterials[pos].startUnloadTime = currentTime;
+			file << currentMaterials[pos].toString();
+
+		}
+
+		// new material
+		currentMaterials[pos].pos = pos;
+		currentMaterials[pos].startLoadTime = currentTime;
 
 	}
 
@@ -176,27 +178,22 @@ public:
 	{
 		cout << "end load" << endl;
 		state = Stop;
+
+		currentMaterials[pos].endLoadTime = currentTime;
+
+		if (currentMaterials[pos].no != -1)
+			state = Waitclean;
+		else
+			state = Stop;   // the first time
+
+		// new material
+		++materialNumber;
+		currentMaterials[pos].no = materialNumber;
+
 	}
 
-	void startUnload()
-	{
-		cout << "start unload" << endl;
-		cout << "[" << currentTime << "]";
 
-
-		dest->startUnload();
-		workRemainTime = dest->workRemainTime;
-		state = Unload;
-
-	}
-
-	void endUnload()
-	{
-		cout << "end unload" << endl;
-		state = Waitclean;
-	}
-
-	void updateState()
+	void updateRemainTime()
 	{
 
 		--workRemainTime;
