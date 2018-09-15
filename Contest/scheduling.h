@@ -10,11 +10,12 @@ CNC* getDest(list<CNC*> waitLoadList, list<CNC*> processList, list<CNC*> waitUnl
 	//initial value
 	int max_waitCNC, max_Pos;  //actually the minimum value
 	bool flag = false;
+	CNC *ret_CNC = nullptr;
 
-	if(!waitLoadList.empty()){
-		max_waitCNC = (*waitLoadList.begin())->workRemainTime；
-		max_Pos = (*waitLoadList.begin())->Pos;
-		CNC *ret_CNC = *waitLoadList.begin();
+	if (!waitLoadList.empty()) {
+		max_waitCNC = (*waitLoadList.begin())->workRemainTime;
+			max_Pos = (*waitLoadList.begin())->Pos;
+		ret_CNC = *waitLoadList.begin();
 		flag = true;
 		for (auto iter = waitLoadList.begin(); iter != waitLoadList.end(); iter++)
 		{
@@ -26,11 +27,11 @@ CNC* getDest(list<CNC*> waitLoadList, list<CNC*> processList, list<CNC*> waitUnl
 			}
 		}
 	}
-	if(!processList.empty()){
-		if(!flag){
-			max_waitCNC = (*processList.begin())->workRemainTime；
-			max_Pos = (*processList.begin())->Pos;
-			CNC *ret_CNC = *processList.begin();
+	if (!processList.empty()) {
+		if (!flag) {
+			max_waitCNC = (*processList.begin())->workRemainTime;
+				max_Pos = (*processList.begin())->Pos;
+			ret_CNC = *processList.begin();
 			flag = true;
 		}
 		for (auto iter = processList.begin(); iter != processList.end(); iter++)
@@ -43,11 +44,11 @@ CNC* getDest(list<CNC*> waitLoadList, list<CNC*> processList, list<CNC*> waitUnl
 			}
 		}
 	}
-	if(!waitUnloadList.empty()){
-		if(!flag){
-			max_waitCNC = (*waitUnloadList.begin())->workRemainTime；
-			max_Pos = (*waitUnloadList.begin())->Pos;
-			CNC *ret_CNC = *waitUnloadList.begin();
+	if (!waitUnloadList.empty()) {
+		if (!flag) {
+			max_waitCNC = (*waitUnloadList.begin())->workRemainTime;
+				max_Pos = (*waitUnloadList.begin())->Pos;
+			ret_CNC = *waitUnloadList.begin();
 			flag = true;
 		}
 		for (auto iter = waitUnloadList.begin(); iter != waitUnloadList.end(); iter++)
@@ -60,8 +61,8 @@ CNC* getDest(list<CNC*> waitLoadList, list<CNC*> processList, list<CNC*> waitUnl
 			}
 		}
 	}
-	if(!flag){
-		cerr<< "All list is empty!" <<endl;
+	if (!flag) {
+		cerr << "All list is empty!" << endl;
 	}
 	return ret_CNC;
 }

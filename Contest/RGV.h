@@ -126,7 +126,7 @@ public:
 // the state of RGV: (init), stop, run, load, unload, clean
 // when loading, unloading and cleaning, RGV cannot move
 // wait is similar to stop, but the task has been distributed
-enum RGVStateT { Stop, Wait, Run, Load, Unload, Clean };
+enum RGVStateT { Stop, Wait, Waitclean, Run, Load, Unload, Clean };
 
 class RGV
 {
@@ -213,43 +213,45 @@ public:
 
 	void endUnload()
 	{
-		// after unload, start clean immediately
+		state = Waitclean;
 
-		startClean();
+
 
 	}
 
 	void updateState()
 	{
 
+		--workRemainTime;
+
 		switch (state)
 		{
-		case Stop:
+		case Stop: case Wait:
 			break;
 
 		case Run:
-			--workRemainTime;
+			
 			if (workRemainTime == 0)
 				endRun();
 			break;
 
-		case Wait:
+		
 			break;
 
 		case Load:
-			--workRemainTime;
+
 			if (workRemainTime == 0)
 				endLoad();
 			break;
 
 		case Clean:
-			--workRemainTime;
+
 			if (workRemainTime == 0)
 				endClean();
 			break;
 
 		case Unload:
-			--workRemainTime;
+
 			if (workRemainTime == 0)
 				endUnload();
 			break;
