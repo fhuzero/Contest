@@ -1,14 +1,46 @@
 #pragma once
 
-#include <vector>
-#include <list>
+
 #include "CNC.h"
 
+
+#include <fstream>
+#include <string>
+
+
+using namespace std;
 
 // the state of RGV: (init), stop, run, load, unload, clean
 // when loading, unloading and cleaning, RGV cannot move
 // wait is similar to stop, but the task has been distributed
 enum RGVStateT { Stop, Wait, Waitclean, Run, Load, Unload, Clean };
+
+struct Material
+{
+	int no;
+	int pos;
+	int startLoadTime;
+	int endLoadTime;
+	int startProcessTime;
+	int endProcessTime;
+	int startUnloadTime;
+	int endUnloadTime;
+	string toString()
+	{
+		// 加工物料序号	加工CNC编号	上料开始时间	下料开始时间
+		return to_string(no) + "," + to_string(pos) + "," + to_string(startLoadTime) + ","
+			+ to_string(startUnloadTime) + "\n";
+	}
+
+	void clear()
+	{
+		no = pos = startLoadTime = endLoadTime = startProcessTime = endProcessTime
+			= startProcessTime = endProcessTime = startUnloadTime = endLoadTime
+			= -1;
+
+	}
+};
+
 
 class RGV
 {
@@ -22,11 +54,16 @@ public:
 	CNC* dest;
 	vector<int> RGVMoveTime;
 	int CleanTime;
+	int currentTime;
 
 	list<CNC*>* waitLoadList;
 	list<CNC*>* processList;
 	list<CNC*>* waitUnloadList;
 
+	ofstream file;
+	int materialNumber;
+	vector<Material> currentMaterials;
+	
 
 	void init(vector<int> RGVmovetime, int cleantime, 
 		list<CNC*>* _waitLoadList, list<CNC*>* _processList, list<CNC*>* _waitUnloadList)
@@ -40,6 +77,11 @@ public:
 		waitLoadList = _waitLoadList;
 		processList = _processList;
 		waitUnloadList = _waitUnloadList;
+		file.open("data.csv", ios::out);
+		materialNumber = 0;
+		currentMaterials = vector<Material>(9);
+		for (auto m : currentMaterials)
+			m.clear();
 	}
 
 	void startWork();
@@ -48,7 +90,7 @@ public:
 	{
 		if (workRemainTime == 0) {
 
-			cout << "[" << currentTime << "]" << "[RGV]";
+			
 
 			switch (state)
 			{
@@ -56,19 +98,22 @@ public:
 				break;
 
 			case Run:
-
+				cout << "[" << currentTime << "]" << "[RGV]";
 				endRun();
 				break;
 
 			case Load:
+				cout << "[" << currentTime << "]" << "[RGV]";
 				endLoad();
 				break;
 
 			case Clean:
+				cout << "[" << currentTime << "]" << "[RGV]";
 				endClean();
 				break;
 
 			case Unload:
+				cout << "[" << currentTime << "]" << "[RGV]";
 				endUnload();
 				break;
 
@@ -89,8 +134,10 @@ public:
 		state = Run;
 
 		// pos == destpos
-		if (workRemainTime == 0)
+		if (workRemainTime == 0) {
+			cout << "[" << currentTime << "]";
 			endRun();
+		}
 	}
 
 	void endRun()
@@ -116,9 +163,13 @@ public:
 	void startLoad()
 	{
 		cout << "start load" << endl;
+		cout << "[" << currentTime << "]";
 		dest->startLoad();
 		workRemainTime = dest->workRemainTime;
 		state = Load;
+		
+		currentMaterials[dest->Pos].startLoadTime = currentTime;
+
 	}
 
 	void endLoad()
@@ -130,6 +181,9 @@ public:
 	void startUnload()
 	{
 		cout << "start unload" << endl;
+		cout << "[" << currentTime << "]";
+
+
 		dest->startUnload();
 		workRemainTime = dest->workRemainTime;
 		state = Unload;

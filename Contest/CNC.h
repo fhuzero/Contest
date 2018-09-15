@@ -1,15 +1,11 @@
 #pragma once
 
-
 #include <list>
+
 using namespace std;
 
-extern int currentTime;
-
-
-
 // the state of CNC: waiting for loading, loading, processing, waiting for unloading, unloading
-enum CNCStateT { Waitload, CNCLoad, Process, Waitunload, CNCUnload };
+enum CNCStateT { Waitload, CNCLoad, Waitprocess, Process, Waitunload, CNCUnload };
 
 class CNC
 {
@@ -24,6 +20,7 @@ public:
 	list<CNC*>* waitLoadList;
 	list<CNC*>* processList;
 	list<CNC*>* waitUnloadList;
+	int currentTime;
 
 
 	void init(int pos, int loadtime, int processtime, 
@@ -33,10 +30,11 @@ public:
 		LoadTime = loadtime;
 		ProcessTime = processtime;
 		workRemainTime = 0;
-		endUnload();  // init
 		waitLoadList = _waitLoadList;
 		processList = _processList;
 		waitUnloadList = _waitUnloadList;
+		endUnload();  // init
+
 	}
 
 
@@ -60,3 +58,5 @@ public:
 
 	void endUnload();
 };
+
+

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "RGV.h"
 #include "scheduling.h"
-inline void RGV::startWork()
+ void RGV::startWork()
 {
 	if (state == Stop) {
 		cout << "[" << currentTime << "]" << "[RGV]";
@@ -20,14 +20,17 @@ inline void RGV::startWork()
 
 
 	if (state == Wait) {
-		cout << "[" << currentTime << "]" << "[RGV]";
 		switch (dest->state)
 		{
 		case Waitload:
+			cout << "[" << currentTime << "]" << "[RGV]";
+
 			startLoad();
 			break;
 
 		case Waitunload:
+			cout << "[" << currentTime << "]" << "[RGV]";
+
 			startUnload();
 			break;
 

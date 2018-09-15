@@ -1,21 +1,27 @@
 #include "stdafx.h"
 #include "CNC.h"
 
-inline void CNC::endWork()
+void CNC::endWork()
 {
 	if (workRemainTime == 0) {
-		cout << "[" << currentTime << "]" << "[CNC" << Pos << "]";
+		
 
 		switch (state)
 		{
 		case Waitload:case Waitunload:
 			break;
 
-		case CNCLoad: endLoad(); break;
+		case CNCLoad: 
+			cout << "[" << currentTime << "]" << "[CNC" << Pos << "]"; 
+			endLoad(); break;
 
-		case Process: endProcess(); break;
+		case Process: 
+			cout << "[" << currentTime << "]" << "[CNC" << Pos << "]"; 
+			endProcess(); break;
 
-		case CNCUnload: endUnload(); break;
+		case CNCUnload: 
+			cout << "[" << currentTime << "]" << "[CNC" << Pos << "]"; 
+			endUnload(); break;
 
 		default:
 			break;
@@ -23,32 +29,36 @@ inline void CNC::endWork()
 	}
 }
 
-inline void CNC::startLoad()
+void CNC::startLoad()
 {
-	cout << "[CNC" << Pos << "]start load; ";
+	cout << "[CNC" << Pos << "]start load; " << endl;
+
+
 	workRemainTime = LoadTime;
 	state = CNCLoad;
 	waitLoadList->remove(this);
 }
 
-inline void CNC::endLoad()
+void CNC::endLoad()
 {
 	cout << "end load" << endl;
-
 	// after loading, start processing immediately
+	cout << "[" << currentTime << "]";
 	startProcess();
 	processList->push_back(this);
+
+
 }
 
-inline void CNC::startProcess()
+void CNC::startProcess()
 {
-	cout << "[CNC" << Pos << "]start process; ";
+	cout << "[CNC" << Pos << "]start process; " << endl;
 	workRemainTime = ProcessTime;
 	state = Process;
 	processList->remove(this);
 }
 
-inline void CNC::endProcess()
+void CNC::endProcess()
 {
 	cout << "end process" << endl;
 	state = Waitunload;
@@ -56,9 +66,9 @@ inline void CNC::endProcess()
 	//waitLoadList.push_back(this);
 }
 
-inline void CNC::startUnload()
+void CNC::startUnload()
 {
-	cout << "[CNC" << Pos << "]start unload; ";
+	cout << "[CNC" << Pos << "]start unload; " << endl;
 	if (state != Waitunload)
 		cout << "Error!";
 	workRemainTime = LoadTime;
@@ -66,10 +76,11 @@ inline void CNC::startUnload()
 
 }
 
-inline void CNC::endUnload()
+void CNC::endUnload()
 {
 	cout << "end unload; " << endl;
 	state = Waitload;
 	//waitUnloadList.push_back(this);
 	waitLoadList->push_back(this);
 }
+
