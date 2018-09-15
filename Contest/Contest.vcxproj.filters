@@ -21,10 +21,13 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RGV.h">
+    <ClInclude Include="scheduling.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="scheduling.h">
+    <ClInclude Include="CNC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RGV.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -33,6 +36,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Contest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CNC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RGV.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,127 +1,9 @@
 #pragma once
 
+#include <vector>
 #include <list>
-#include <iostream>
-#include <cmath>
+#include "CNC.h"
 
-using namespace std;
-
-// the state of CNC: waiting for loading, loading, processing, waiting for unloading, unloading
-enum CNCStateT { Waitload, CNCLoad, Process, Waitunload, CNCUnload };
-
-class CNC;
-
-list<CNC*> waitLoadList, processList, waitUnloadList;
-
-class CNC
-{
-
-public:
-
-	int Pos; // position
-	int LoadTime; // load and unload time
-	int ProcessTime;
-	int workRemainTime;
-	CNCStateT state;
-
-
-	void init(int pos, int loadtime, int processtime)
-	{
-		Pos = pos;
-		LoadTime = loadtime;
-		ProcessTime = processtime;
-		workRemainTime = 0;
-		endUnload();  // init
-	}
-
-
-	void updateState()
-	{
-
-		--workRemainTime;
-
-		switch (state)
-		{
-		case Waitload:case Waitunload:
-			break;
-
-		case CNCLoad:
-
-			if (workRemainTime == 0) {
-				endLoad();
-			}
-			break;
-
-		case Process:
-			if (workRemainTime == 0) {
-				endProcess();
-			}
-
-			break;
-
-		case CNCUnload:
-			if (workRemainTime == 0) {
-				endUnload();
-			}
-			break;
-
-		default:
-			break;
-		}
-	}
-
-
-	void startLoad()
-	{
-		cout << "[CNC" << Pos << "]start load; ";
-		workRemainTime = LoadTime;
-		state = CNCLoad;
-		waitLoadList.remove(this);
-	}
-
-	void endLoad()
-	{
-		cout << "[CNC" << Pos << "]end load; ";
-
-		// after loading, start processing immediately
-		startProcess();
-		processList.push_back(this);
-	}
-
-	void startProcess()
-	{
-		cout << "[CNC" << Pos << "]start process; ";
-		workRemainTime = ProcessTime;
-		state = Process;
-		processList.remove(this);
-	}
-
-	void endProcess()
-	{
-		cout << "[CNC" << Pos << "]end process; ";
-		state = Waitunload;
-		processList.remove(this);
-		//waitLoadList.push_back(this);
-	}
-
-	void startUnload()
-	{
-		cout << "[CNC" << Pos << "]start unload; ";
-		if (state != Waitunload)
-			cout << "Error!";
-		workRemainTime = LoadTime;
-		state = CNCUnload;
-
-	}
-
-	void endUnload()
-	{
-		cout << "[CNC" << Pos << "]end unload; ";
-		state = Waitload;
-		//waitUnloadList.push_back(this);
-		waitLoadList.push_back(this);
-	}
-};
 
 // the state of RGV: (init), stop, run, load, unload, clean
 // when loading, unloading and cleaning, RGV cannot move
@@ -141,9 +23,13 @@ public:
 	vector<int> RGVMoveTime;
 	int CleanTime;
 
+	list<CNC*>* waitLoadList;
+	list<CNC*>* processList;
+	list<CNC*>* waitUnloadList;
 
 
-	void init(vector<int> RGVmovetime, int cleantime)
+	void init(vector<int> RGVmovetime, int cleantime, 
+		list<CNC*>* _waitLoadList, list<CNC*>* _processList, list<CNC*>* _waitUnloadList)
 	{
 		RGVMoveTime = RGVmovetime;
 		CleanTime = cleantime;
@@ -151,12 +37,50 @@ public:
 		state = Stop;
 		workRemainTime = 0;
 		dest = nullptr;
+		waitLoadList = _waitLoadList;
+		processList = _processList;
+		waitUnloadList = _waitUnloadList;
 	}
 
+	void startWork();
+
+	void endWork()
+	{
+		if (workRemainTime == 0) {
+
+			cout << "[" << currentTime << "]" << "[RGV]";
+
+			switch (state)
+			{
+			case Stop: case Wait:
+				break;
+
+			case Run:
+
+				endRun();
+				break;
+
+			case Load:
+				endLoad();
+				break;
+
+			case Clean:
+				endClean();
+				break;
+
+			case Unload:
+				endUnload();
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 
 	void startRun()
 	{
-		cout << "[RGV]start run, pos:" << pos << ", dest pos:" << dest->Pos << "; ";
+		cout << "start run, pos:" << pos << ", dest pos:" << dest->Pos << endl;
 		int truePos = (pos - 1) / 2;
 		int trueDestPos = (dest->Pos - 1) / 2;
 		int dist = abs(truePos - trueDestPos);
@@ -172,25 +96,26 @@ public:
 	void endRun()
 	{
 		pos = dest->Pos;
-		cout << "[RGV]end run, pos:" << pos << "; ";
+		cout << "end run, pos:" << pos << endl;
 		state = Wait;
 	}
 
 	void startClean()
 	{
-		cout << "[RGV]start clean; ";
+		cout << "start clean" << endl;
 		workRemainTime = CleanTime;
 		state = Clean;
 	}
 
 	void endClean()
 	{
-		cout << "[RGV]end clean; ";
+		cout << "end clean" << endl;
 		state = Stop;
 	}
 
 	void startLoad()
 	{
+		cout << "start load" << endl;
 		dest->startLoad();
 		workRemainTime = dest->workRemainTime;
 		state = Load;
@@ -198,13 +123,13 @@ public:
 
 	void endLoad()
 	{
+		cout << "end load" << endl;
 		state = Stop;
 	}
 
-
-
 	void startUnload()
 	{
+		cout << "start unload" << endl;
 		dest->startUnload();
 		workRemainTime = dest->workRemainTime;
 		state = Unload;
@@ -213,53 +138,14 @@ public:
 
 	void endUnload()
 	{
+		cout << "end unload" << endl;
 		state = Waitclean;
-
-
-
 	}
 
 	void updateState()
 	{
 
 		--workRemainTime;
-
-		switch (state)
-		{
-		case Stop: case Wait:
-			break;
-
-		case Run:
-			
-			if (workRemainTime == 0)
-				endRun();
-			break;
-
-		
-			break;
-
-		case Load:
-
-			if (workRemainTime == 0)
-				endLoad();
-			break;
-
-		case Clean:
-
-			if (workRemainTime == 0)
-				endClean();
-			break;
-
-		case Unload:
-
-			if (workRemainTime == 0)
-				endUnload();
-			break;
-
-		default:
-			break;
-		}
-
 
 
 	}

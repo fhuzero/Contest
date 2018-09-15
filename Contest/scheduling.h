@@ -1,11 +1,10 @@
 #pragma once
 
-#include "RGV.h"
-#include <list>
+#include "CNC.h"
 
 using namespace std;
 
-CNC* getDest(list<CNC*> waitLoadList, list<CNC*> processList, list<CNC*> waitUnloadList)
+CNC* getDest(const list<CNC*>& waitLoadList,const list<CNC*>& processList,const list<CNC*>& waitUnloadList)
 {
 	//initial value
 	int max_waitCNC, max_Pos;  //actually the minimum value
